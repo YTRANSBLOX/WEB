@@ -1,6 +1,5 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
 
 const SUPABASE_URL = 'https://bkhdyrrtvafaiadtgyht.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJraGR5cnJ0dmFmYWlhZHRneWh0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MTIzMjEsImV4cCI6MjA4OTI4ODMyMX0.g0wE4UG-vXsGlgNQkzF8NBbcHWMq-CNQ4oBgCcs9Ios';
@@ -20,15 +19,14 @@ type Script = {
 };
 
 export default function ScriptDetail() {
-  const params = useParams();
-  const slug = params?.slug as string;
   const [script, setScript] = useState<Script | null>(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
-    if (!slug) return;
+    const slug = window.location.pathname.split('/').filter(Boolean).pop();
+    if (!slug) { setNotFound(true); setLoading(false); return; }
     fetch(`${SUPABASE_URL}/rest/v1/scripts?slug=eq.${slug}&is_public=eq.true&limit=1`, {
       headers: {
         'apikey': SUPABASE_KEY,
@@ -42,7 +40,7 @@ export default function ScriptDetail() {
         setLoading(false);
       })
       .catch(() => { setNotFound(true); setLoading(false); });
-  }, [slug]);
+  }, []);
 
   function copyScript() {
     if (!script?.loadstring) return;
