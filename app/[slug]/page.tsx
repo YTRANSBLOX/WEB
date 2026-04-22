@@ -18,7 +18,7 @@ type Script = {
   status?: string;
   created_at: string;
 };
-
+export const dynamic = 'force-static';
 export default function ScriptDetail() {
   const params = useParams();
   const slug = params?.slug as string;
