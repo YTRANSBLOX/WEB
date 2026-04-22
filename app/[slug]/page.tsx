@@ -18,15 +18,6 @@ type Script = {
   status?: string;
   created_at: string;
 };
-export async function generateStaticParams() {
-  const res = await fetch(`https://bkhdyrrtvafaradtgyht.supabase.co/rest/v1/scripts?select=slug&is_public=eq.true`, {
-    headers: {
-      'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJraGR5cnJ0dmFmYXJhZHRneWh0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ1MzI2MDgsImV4cCI6MjA2MDEwODYwOH0.Fvlzs3VHBYMrNnG8wM3S5I2x3Fhp82lpGQoIXGWwxHA',
-    }
-  });
-  const data = await res.json();
-  return data.map((s: { slug: string }) => ({ slug: s.slug }));
-}
 export default function ScriptDetail() {
   const params = useParams();
   const slug = params?.slug as string;
