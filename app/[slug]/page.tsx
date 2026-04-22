@@ -18,7 +18,6 @@ type Script = {
   status?: string;
   created_at: string;
 };
-export const dynamic = 'force-static';
 export async function generateStaticParams() {
   const res = await fetch(`https://bkhdyrrtvafaradtgyht.supabase.co/rest/v1/scripts?select=slug&is_public=eq.true`, {
     headers: {
