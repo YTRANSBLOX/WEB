@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RANSBLOX Thumbnail Generator</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;700&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0a0a0a;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 28px 20px;
+    gap: 24px;
+  }
+  h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 30px;
+    letter-spacing: 3px;
+    color: #39ff14;
+    text-shadow: 0 0 20px #39ff1480;
+  }
+  .main {
+    display: flex;
+    gap: 28px;
+    width: 100%;
+    max-width: 1200px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  /* PANEL */
+  .panel {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    width: 280px;
+    flex-shrink: 0;
+  }
+  .section {
+    background: #111;
+    border: 1px solid #1e1e1e;
+    border-radius: 10px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .section-title {
+    font-size: 10px;
+    font-weight: 700;
+    color: #39ff14;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+  .upload-zone {
+    border: 1.5px dashed #2a2a2a;
+    border-radius: 8px;
+    padding: 12px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 12px;
+    color: #555;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .upload-zone:hover { border-color: #39ff14; color: #39ff14; }
+  .upload-zone.has-file { border-color: #39ff14; color: #39ff14; background: #0d180a; }
+  .upload-zone input {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+  }
+  .upload-zone .icon { font-size: 18px; display: block; margin-bottom: 3px; }
+  .field-label {
+    font-size: 11px;
+    color: #555;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  input[type=text] {
+    background: #1a1a1a;
+    border: 1.5px solid #2a2a2a;
+    border-radius: 7px;
+    padding: 9px 12px;
+    color: #fff;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 16px;
+    letter-spacing: 1.5px;
+    outline: none;
+    width: 100%;
+    transition: border-color 0.2s;
+  }
+  input[type=text]:focus { border-color: #39ff14; }
+  input[type=range] { width: 100%; accent-color: #39ff14; cursor: pointer; }
+  .row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .row .field-label { flex: 1; }
+  input[type=color] {
+    width: 38px; height: 28px;
+    border: none; border-radius: 6px;
+    cursor: pointer; background: none; padding: 0;
+  }
+  .val { font-size: 12px; color: #39ff14; font-weight: 700; min-width: 32px; text-align: right; }
+  .color-presets { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  .preset {
+    width: 26px; height: 26px;
+    border-radius: 5px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: border-color 0.15s;
+  }
+  .preset:hover, .preset.active { border-color: #fff; }
+  .slider-block { display: flex; flex-direction: column; gap: 4px; }
+  .btn-generate {
+    background: #39ff14;
+    color: #000;
+    border: none;
+    border-radius: 10px;
+    padding: 15px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 2px;
+    cursor: pointer;
+    width: 100%;
+    transition: all 0.15s;
+    box-shadow: 0 0 20px #39ff1440;
+  }
+  .btn-generate:hover { background: #2de010; box-shadow: 0 0 30px #39ff1470; transform: translateY(-1px); }
+  .btn-export {
+    background: #111;
+    color: #39ff14;
+    border: 1.5px solid #39ff14;
+    border-radius: 10px;
+    padding: 12px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 2px;
+    cursor: pointer;
+    width: 100%;
+    transition: all 0.15s;
+  }
+  .btn-export:hover { background: #39ff1415; }
+
+  /* CANVAS */
+  .canvas-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    min-width: 300px;
+  }
+  .canvas-container {
+    border: 3px solid #39ff14;
+    border-radius: 10px;
+    box-shadow: 0 0 30px #39ff1450, inset 0 0 30px #39ff1408;
+    overflow: hidden;
+    background: #000;
+    width: 100%;
+    max-width: 854px;
+  }
+  canvas { display: block; width: 100%; height: auto; }
+  .hint { font-size: 11px; color: #333; }
+</style>
+</head>
+<body>
+
+<h1>⚡ RANSBLOX THUMBNAIL GENERATOR</h1>
+
+<div class="main">
+
+  <div class="panel">
+
+    <div class="section">
+      <div class="section-title">📁 Assets</div>
+
+      <div class="field-label">Background</div>
+      <div class="upload-zone" id="zone-bg">
+        <span class="icon">🖼️</span>
+        <span id="lbl-bg">Upload Background</span>
+        <input type="file" accept="image/*" id="inp-bg">
+      </div>
+
+      <div class="field-label">GUI Screenshot</div>
+      <div class="upload-zone" id="zone-gui">
+        <span class="icon">🖥️</span>
+        <span id="lbl-gui">Upload GUI</span>
+        <input type="file" accept="image/*" id="inp-gui">
+      </div>
+
+      <div class="field-label">Character (PNG)</div>
+      <div class="upload-zone" id="zone-char">
+        <span class="icon">🧍</span>
+        <span id="lbl-char">Upload Character</span>
+        <input type="file" accept="image/*" id="inp-char">
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">✏️ Text</div>
+      <div class="field-label">Game Name</div>
+      <input type="text" id="game-name" placeholder="VIOLENCE DISTRICT">
+
+      <div class="field-label">Text Color</div>
+      <div class="color-presets">
+        <div class="preset active" style="background:#f5e642" data-color="#f5e642"></div>
+        <div class="preset" style="background:#39ff14" data-color="#39ff14"></div>
+        <div class="preset" style="background:#ffffff" data-color="#ffffff"></div>
+        <div class="preset" style="background:#ff4444" data-color="#ff4444"></div>
+        <div class="preset" style="background:#00cfff" data-color="#00cfff"></div>
+        <div class="preset" style="background:#ff9900" data-color="#ff9900"></div>
+        <input type="color" id="txt-color" value="#f5e642" title="Custom">
+      </div>
+
+      <div class="slider-block">
+        <div class="row"><span class="field-label">Font Size</span><span class="val" id="val-tsize">72</span></div>
+        <input type="range" id="txt-size" min="30" max="120" value="72">
+      </div>
+
+      <div class="slider-block">
+        <div class="row"><span class="field-label">Text Y</span><span class="val" id="val-ty">88</span></div>
+        <input type="range" id="txt-y" min="50" max="99" value="88">
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">🎛️ Layout</div>
+
+      <div class="slider-block">
+        <div class="row"><span class="field-label">GUI Scale</span><span class="val" id="val-gscale">70</span></div>
+        <input type="range" id="gui-scale" min="20" max="100" value="70">
+      </div>
+
+      <div class="slider-block">
+        <div class="row"><span class="field-label">GUI Tilt °</span><span class="val" id="val-gtilt">-8</span></div>
+        <input type="range" id="gui-tilt" min="-30" max="30" value="-8">
+      </div>
+
+      <div class="slider-block">
+        <div class="row"><span class="field-label">GUI Y</span><span class="val" id="val-gy">10</span></div>
+        <input type="range" id="gui-y" min="-20" max="60" value="10">
+      </div>
+
+      <div class="slider-block">
+        <div class="row"><span class="field-label">Char Scale</span><span class="val" id="val-cscale">85</span></div>
+        <input type="range" id="char-scale" min="30" max="150" value="85">
+      </div>
+
+      <div class="slider-block">
+        <div class="row"><span class="field-label">Char X</span><span class="val" id="val-cx">62</span></div>
+        <input type="range" id="char-x" min="0" max="100" value="62">
+      </div>
+    </div>
+
+    <button class="btn-generate" onclick="renderCanvas()">⚡ GENERATE</button>
+    <button class="btn-export" onclick="exportPNG()">💾 EXPORT PNG</button>
+  </div>
+
+  <div class="canvas-wrap">
+    <div class="canvas-container">
+      <canvas id="cv" width="1280" height="720"></canvas>
+    </div>
+    <div class="hint">1280 × 720 px — YouTube Thumbnail</div>
+  </div>
+
+</div>
+
+<script>
+  const cv = document.getElementById('cv');
+  const ctx = cv.getContext('2d');
+  const W = 1280, H = 720;
+
+  let imgBg = null, imgGui = null, imgChar = null;
+  let txtColor = '#f5e642';
+
+  function loadImage(file, cb) {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const img = new Image();
+      img.onload = () => cb(img);
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function setupUpload(inputId, zoneId, lblId, setter) {
+    document.getElementById(inputId).addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      loadImage(file, img => {
+        setter(img);
+        document.getElementById(zoneId).classList.add('has-file');
+        document.getElementById(lblId).textContent = '✓ ' + file.name;
+        renderCanvas();
+      });
+    });
+  }
+
+  setupUpload('inp-bg',   'zone-bg',   'lbl-bg',   img => imgBg   = img);
+  setupUpload('inp-gui',  'zone-gui',  'lbl-gui',  img => imgGui  = img);
+  setupUpload('inp-char', 'zone-char', 'lbl-char', img => imgChar = img);
+
+  // Color presets
+  document.querySelectorAll('.preset[data-color]').forEach(p => {
+    p.addEventListener('click', () => {
+      document.querySelectorAll('.preset').forEach(x => x.classList.remove('active'));
+      p.classList.add('active');
+      txtColor = p.dataset.color;
+      document.getElementById('txt-color').value = txtColor;
+      renderCanvas();
+    });
+  });
+  document.getElementById('txt-color').addEventListener('input', e => {
+    txtColor = e.target.value;
+    document.querySelectorAll('.preset').forEach(x => x.classList.remove('active'));
+    renderCanvas();
+  });
+
+  // Sliders
+  [
+    ['txt-size','val-tsize'],
+    ['txt-y','val-ty'],
+    ['gui-scale','val-gscale'],
+    ['gui-tilt','val-gtilt'],
+    ['gui-y','val-gy'],
+    ['char-scale','val-cscale'],
+    ['char-x','val-cx'],
+  ].forEach(([id, vid]) => {
+    document.getElementById(id).addEventListener('input', () => {
+      document.getElementById(vid).textContent = document.getElementById(id).value;
+      renderCanvas();
+    });
+  });
+
+  document.getElementById('game-name').addEventListener('input', renderCanvas);
+
+  function gv(id) { return parseFloat(document.getElementById(id).value); }
+
+  function renderCanvas() {
+    ctx.clearRect(0, 0, W, H);
+
+    // BG
+    if (imgBg) {
+      // cover fit
+      const scale = Math.max(W / imgBg.width, H / imgBg.height);
+      const sw = imgBg.width * scale, sh = imgBg.height * scale;
+      ctx.drawImage(imgBg, (W - sw) / 2, (H - sh) / 2, sw, sh);
+    } else {
+      ctx.fillStyle = '#050a05';
+      ctx.fillRect(0, 0, W, H);
+    }
+
+    // Dark gradient overlay bottom
+    const ov = ctx.createLinearGradient(0, H * 0.4, 0, H);
+    ov.addColorStop(0, 'rgba(0,0,0,0)');
+    ov.addColorStop(1, 'rgba(0,0,0,0.80)');
+    ctx.fillStyle = ov;
+    ctx.fillRect(0, 0, W, H);
+
+    // GUI (left, tilted)
+    if (imgGui) {
+      const scale = gv('gui-scale') / 100;
+      const tilt  = (gv('gui-tilt') * Math.PI) / 180;
+      const gyPct = gv('gui-y') / 100;
+      const gW = W * 0.50 * scale;
+      const gH = (imgGui.height / imgGui.width) * gW;
+      const gX = W * 0.04;
+      const gY = H * gyPct;
+
+      ctx.save();
+      ctx.translate(gX + gW / 2, gY + gH / 2);
+      ctx.rotate(tilt);
+      ctx.drawImage(imgGui, -gW / 2, -gH / 2, gW, gH);
+      ctx.restore();
+    }
+
+    // Character (right)
+    if (imgChar) {
+      const scale = gv('char-scale') / 100;
+      const xPct  = gv('char-x') / 100;
+      const cH = H * 1.05 * scale;
+      const cW = (imgChar.width / imgChar.height) * cH;
+      const cX = W * xPct - cW / 2;
+      const cY = H - cH + H * 0.04;
+      ctx.drawImage(imgChar, cX, cY, cW, cH);
+    }
+
+    // Game name text
+    const name = (document.getElementById('game-name').value || 'GAME NAME').toUpperCase();
+    const tSize = gv('txt-size');
+    const tY    = H * (gv('txt-y') / 100);
+
+    ctx.save();
+    ctx.font = `${tSize}px 'Bebas Neue', sans-serif`;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'bottom';
+    // drop shadow
+    ctx.shadowColor = 'rgba(0,0,0,0.95)';
+    ctx.shadowBlur = 14;
+    ctx.shadowOffsetX = 4;
+    ctx.shadowOffsetY = 4;
+    ctx.fillStyle = txtColor;
+    ctx.fillText(name, W * 0.035, tY);
+    ctx.restore();
+
+    // Neon border
+    const bw = 7;
+    ctx.save();
+    ctx.shadowColor = '#39ff14';
+    ctx.shadowBlur = 28;
+    ctx.strokeStyle = '#39ff14';
+    ctx.lineWidth = bw;
+    ctx.strokeRect(bw / 2, bw / 2, W - bw, H - bw);
+    ctx.restore();
+  }
+
+  function exportPNG() {
+    renderCanvas();
+    const a = document.createElement('a');
+    const slug = (document.getElementById('game-name').value || 'thumbnail').toLowerCase().replace(/\s+/g, '-');
+    a.download = `ransblox-${slug}.png`;
+    a.href = cv.toDataURL('image/png');
+    a.click();
+  }
+
+  renderCanvas();
+</script>
+</body>
+</html>
